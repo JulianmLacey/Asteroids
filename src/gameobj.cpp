@@ -7,6 +7,7 @@ gameObject::gameObject(ImVec2 ScreenSize) {
     timeUntilNextEnemy = 0;
     maxEnemies = 2;
     level = 1;
+    //server = NULL;
     p1 = new player(ImVec2(ScreenSize.x / 2, ScreenSize.y / 2), this);
     srand(time(NULL));
     int b = 0;
@@ -47,7 +48,7 @@ void gameObject::drawBackground() {
 void gameObject::updateGame() {
 
     p1->update(this->enemies, this);
-
+    std::cout << "Checkpoint 3" << std::endl;
     ImVec2 PlayerPosition = p1->getEnemy_PlayerHeading();
     ImVec2 PlayerPositionReal = p1->getPosition();
 
@@ -56,7 +57,7 @@ void gameObject::updateGame() {
     if (!p1->getIsInventory()) {
         timeUntilNextEnemy -= ImGui::GetIO().DeltaTime;
         if (timeUntilNextEnemy <= 0 && enemies.size() < maxEnemies) {
-            this->addEnemy();
+            //this->addEnemy();
             timeUntilNextEnemy = 10 / level;
         }
         if (enemies.size() >= 1) {
@@ -98,24 +99,24 @@ extern inline void printMSG(Node* nd, std::string msg) {
     std::cout << nd->ip << " : " << msg << std::endl;
 }
 
-bool gameObject::createServer() {
-    int port = 12002;
+// bool gameObject::createServer() {
+//     int port = 12002;
 
 
-    // create server instance with specified port number
-    tcp::server server(port);
+//     // create server instance with specified port number
+//     tcp::server gameServer(port);
 
-    // set async fn to handle incoming messages
-    server.OnMessage(printMSG);
+//     // set async fn to handle incoming messages
+//     gameServer.OnMessage(printMSG);
 
-    //start listening to connections
-    int result = server.Listen();
+//     //start listening to connections
+//     int result = server.Listen();
 
-    if (result != 0) {
-        std::cout << "Faild to start server !" << std::endl;
-        return 0;
-    }
+//     if (result != 0) {
+//         std::cout << "Faild to start server !" << std::endl;
+//         return 0;
+//     }
 
-    cout << "server started on port: " << port << std::endl;
-    return 1;
-}
+//     cout << "server started on port: " << port << std::endl;
+//     return 1;
+// }

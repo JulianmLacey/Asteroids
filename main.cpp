@@ -10,7 +10,7 @@
 #if defined(IMGUI_IMPL_OPENGL_ES2)
 #include <GLES2/gl2.h>
 #endif
-#include <GLFW/glfw3.h>  // Will drag system OpenGL headers
+#include <GLFW/glfw3.h> 
 
 #include "src/gameobj.hpp"
 #include "src/module.hpp"
@@ -94,7 +94,7 @@ int main(int, char**) {
     mod1->setNodeModule((void*)newT, 0);
     //mod1->module::setNodeModule((void*)newG, 1);
     player1->setNodeModule((void*)mod1, 0);
-    app.addEnemy();
+    //app.addEnemy();
     //printf("Player: %p; Truss parent: %p", player1, mod1->getParent());
     //player1->addGun(newG);
     //app.addEnemy();
@@ -107,7 +107,7 @@ int main(int, char**) {
 #endif
     {
         glfwPollEvents();
-
+        std::cout << "Checkpoint 1" << std::endl;
         // Start the Dear ImGui frame
         ImGui_ImplOpenGL3_NewFrame();
         ImGui_ImplGlfw_NewFrame();
@@ -127,25 +127,34 @@ int main(int, char**) {
 
         if (menu) {
             if (ImGui::Begin("Main Menu", NULL, windowConfig)) {
+                int port;
                 ImGui::SetWindowFontScale(1.5f);
                 ImGui::SetCursorPos(ImVec2(SCREENWIDTH / 2 - 100, SCREENHEIGHT / 2 - 100));
                 ImGui::Text("Welcome to Asteroids!");
                 ImGui::SetCursorPos(ImVec2(SCREENWIDTH / 2 - 150, SCREENHEIGHT / 2));
                 ImGui::Text("Press 'Play' to start the game");
-                ImGui::SetCursorPos(ImVec2(SCREENWIDTH / 2 - 10, SCREENHEIGHT / 2 + 100));
 
-                if (ImGui::Button("Play")) {
-                    //app.createServer();
+
+                ImGui::SetCursorPos(ImVec2(SCREENWIDTH / 2 - 60, SCREENHEIGHT / 2 + 100));
+                if (ImGui::Button("Single Player")) {
+
                     menu = false;
                 }
-                ImGui::SetCursorPos(ImVec2(SCREENWIDTH / 2 - 10, SCREENHEIGHT / 2 + 100));
-                ImGui::SetCursorPos(ImVec2(SCREENWIDTH / 2 - 10, SCREENHEIGHT / 2 + 100));
+                ImGui::SetCursorPos(ImVec2(SCREENWIDTH / 2 - 200, SCREENHEIGHT / 2 + 150));
+                ImGui::InputInt("TCP Port", &port);
+                ImGui::SetCursorPos(ImVec2(SCREENWIDTH / 2 - 60, SCREENHEIGHT / 2 + 200));
+                if (ImGui::Button("Multiplayer")) {
+    //app.createServer();
+                    menu = false;
+                }
+
                 ImGui::End();
             }
         }
 
         if (menu == false && ImGui::Begin("Main Window", NULL, windowConfig)) {
-
+            std::cout << "Checkpoint 2" << std::endl;
+            ImGui::SetWindowFontScale(1.2f);
             ImGui::Text("FPS: %.2f", ImGui::GetIO().Framerate);
             ImGui::Text("Bands: %d", app.getPlayer()->getBandCount());
             ImGui::Text("Kills: %d", app.getPlayer()->getKills());

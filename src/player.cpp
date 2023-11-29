@@ -46,20 +46,17 @@ void player::drawPlayer() {
     float cosTheta = cos(angle);
     float sinTheta = sin(angle);
 
-
-    //-(A*Math.cos(angle),A*Math.sin(angle))
-    // -(A*Math.cos(angle+2*Math.PI/3),A*Math.sin(angle+2*Math.PI/3))
-    // -(A*Math.cos(angle-2*Math.PI/3),A*Math.sin(angle-2*Math.PI/3))
-
     //calculate player triangle window location
     ImVec2 p1((position.x - radius * cosTheta), position.y - radius * sinTheta);
     ImVec2 p2(position.x - radius * (cos(angle + (2 * M_PI / 3))), position.y - radius * sin(angle + (2 * M_PI / 3)));
     ImVec2 p3(position.x - radius * (cos(angle - (2 * M_PI / 3))), position.y - radius * sin(angle - (2 * M_PI / 3)));
+    //ImVec2 p4(position.x - radius * (cos(angle - (M_PI / 2))), position.y - radius * sin(angle));
 
 
     //draw player triangle
 
     drawList->AddTriangle(p1, p2, p3, ImColor(0, 0, 255, 255));
+    //drawList->AddLine(p2, p4, ImColor(0, 0, 255, 255));
 
     double T_rot = M_PI / 2;
 

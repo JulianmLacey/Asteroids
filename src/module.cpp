@@ -201,8 +201,6 @@ void module::showModuleNodes(ImDrawList* dl, float rd) {
 
         modNodes[ i ]->showModuleNode(dl, rd, i, this);
 
-
-
     }
     ImGui::SetCursorPos(ImVec2(this->position.x - radius / 4, this->position.y - radius / 5));
     ImGui::PushID(this);

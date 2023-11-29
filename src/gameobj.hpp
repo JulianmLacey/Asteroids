@@ -55,7 +55,7 @@ private:
     float timeUntilNextEnemy;
     int level;
     int maxEnemies;
-    tcp::server* server;
+    //tcp::server* server;
 };
 
 
