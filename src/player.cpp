@@ -3,16 +3,21 @@
 #include "gameobj.hpp"
 
 
-player::player(ImVec2 pos) {
+player::player(ImVec2 pos, gameObject* g) {
     position = ImVec2(600, 300);
     velocity = ImVec2(0, 0);
     radius = 20;
-    balance = 0;
+    C_a = 5;
+    maxSpeed = 30;
+    friction = 0.15f;
+    balance = 1000;
     timeAlive = 0;
     headingDifferential = 0;
     headingDifferentialSet = false;
+    kills = 0;
+    this->parent = NULL;
     curStatus = { false,false,false };
-
+    this->gObj = g;
     for (int i = 0; i < 4; i++) {
         modNodes.push_back(new moduleNode());
         modNodes[ i ]->InitNodeModule(this->gObj);
@@ -22,6 +27,14 @@ player::player(ImVec2 pos) {
 
 void player::addBalance(int m) {
     balance += m;
+}
+void player::removeGun(gun* g) {
+    for (int i = 0; i < pewpews.size(); i++) {
+        if (pewpews[ i ] == g) {
+            pewpews.erase(pewpews.begin() + i);
+            return;
+        }
+    }
 }
 void player::drawPlayer() {
     //x* cosTheta - y * sinTheta
@@ -57,19 +70,10 @@ void player::drawPlayer() {
         n.x = position.x - dist * cos(angle - ((float)k * T_rot) - M_PI / 3);
         n.y = position.y - dist * sin(angle - ((float)k * T_rot) - M_PI / 3);
 
-
-
         modNodes[ k ]->updateNodePosition(n, angle - 1.85f);
-
         modNodes[ k ]->drawNodeModule(this->drawList);
-
-
     }
 
-
-
-    //show radius circle
-   // drawList->AddCircle(position, radius, ImColor(0, 0, 255, 255));
 
 }
 
@@ -128,6 +132,17 @@ void player::addGun(gun* g) {
     this->pewpews.push_back(g);
     g->setPewPew(&bullets);
 
+}
+bool player::getIsMoving() {
+    return curStatus.isMoving;
+
+}
+bool player::getIsInventory() {
+    return curStatus.isInventory;
+}
+void player::addThruster(float da, float ds) {
+    this->maxSpeed += ds;
+    this->C_a += da;
 }
 void player::handleEvents() {
 
@@ -197,12 +212,15 @@ void player::update(std::vector<enemy*>& gameEnemies, gameObject* gObj) {
                     j++;
                 } else if (dist) {
                     bullets.erase(bullets.begin() + i);
-                    delete bullets[ i ];
+                    //delete bullets[ i ];
                     i++;
                 }
             }
             bullets[ i ]->drawBullet(ImGui::GetWindowDrawList());
         }
+    }
+    if (this->kills % 10 == 0 && this->kills != 0) {
+        gObj->increaseLevel();
     }
 }
 ImVec2 player::getPosition() {
@@ -220,6 +238,10 @@ ImVec2 player::getEnemy_PlayerHeading() {
     }
     //std::cout << headingDifferential << std::endl;
     return ImVec2(position.x + headingDifferential, position.y + headingDifferential);
+
+}
+void player::addKill() {
+    this->kills++;
 
 }
 int player::getBandCount() {

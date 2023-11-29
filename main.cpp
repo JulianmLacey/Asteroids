@@ -90,6 +90,8 @@ int main(int, char**) {
     player* player1 = app.getPlayer();
     module* mod1 = new truss(ImVec2(0, 0), 0, (void*)player1, &app);
     //gun* newG = new gun(ImVec2(0, 0), 0, player1, &app);
+    thruster* newT = new thruster(ImVec2(0, 0), 0, (void*)player1, &app);
+    mod1->setNodeModule((void*)newT, 0);
     //mod1->module::setNodeModule((void*)newG, 1);
     player1->setNodeModule((void*)mod1, 0);
     app.addEnemy();

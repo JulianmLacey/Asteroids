@@ -10,6 +10,17 @@
 class gun;
 class player;
 
+struct backgroundStar {
+    backgroundStar(ImVec2& pos, int n) {
+        position.x = pos.x;
+        position.y = pos.y;
+        size = rand() % n + 1;
+        alpha = ((float)(rand() % 100 + 1)) / 200.0f;
+    }
+    ImVec2 position;
+    float size;
+    float alpha;
+};
 
 
 
@@ -33,12 +44,18 @@ public:
     void killEnemy(enemy* e);
     void addGun(gun* g);
     bool createServer();
-
-
+    void increaseLevel();
+    void drawBackground();
 private:
     player* p1;
     std::vector<enemy*> enemies;
+    std::vector<backgroundStar*> foregroundStars;
+    std::vector<backgroundStar*> backgroundStars;
     ImVec2 screenDIM;
+    float timeUntilNextEnemy;
+    int level;
+    int maxEnemies;
+    tcp::server* server;
 };
 
 

@@ -132,17 +132,36 @@ void moduleNode::showModuleNode(ImDrawList* dl, float rad, int id, module* paren
 
         if (ImGui::BeginPopup("NodeInfo")) {
             //player* p = gameObject::getPlayer();
-            if (ImGui::Selectable("Buy Truss Module")) {
-                this->setModuleNode((void*)(new truss(this->ModNodePos, 0, (void*)parent, this->game)), ((id > 1) ? id - 2 : id + 2));
-                ((module*)this->mod)->setParent(((id > 1) ? id - 2 : id + 2));
+            int balance = ((gameObject*)(parent->getGameObject()))->getPlayer()->getBandCount();
+            if (balance < 100) {
+                ImGui::Selectable("Buy Truss Module: Not Enough Money");
+            } else {
+                if (ImGui::Selectable("Buy Truss Module")) {
+                    ((gameObject*)(parent->getGameObject()))->getPlayer()->addBalance(-100);
+                    this->setModuleNode((void*)(new truss(this->ModNodePos, 0, (void*)parent, this->game)), ((id > 1) ? id - 2 : id + 2));
+                    ((module*)this->mod)->setParent(((id > 1) ? id - 2 : id + 2));
+                }
             }
-            if (ImGui::Selectable("Buy Thruster Module")) {
+            if (balance < 200) {
+                ImGui::Selectable("Buy Thruster Module: Not Enough Money");
+            } else {
+                if (ImGui::Selectable("Buy Thruster Module")) {
+                    ((gameObject*)(parent->getGameObject()))->getPlayer()->addBalance(-200);
+                    this->setModuleNode((void*)(new thruster(this->ModNodePos, 0, (void*)parent, this->game)), ((id > 1) ? id - 2 : id + 2));
+                    ((module*)this->mod)->setParent(((id > 1) ? id - 2 : id + 2));
+                }
+            }
 
-            }
-            if (ImGui::Selectable("Buy Gun Module")) {
-                this->setModuleNode((void*)(new gun(this->ModNodePos, 0, (void*)parent, this->game)), ((id > 1) ? id - 2 : id + 2));
-                ((module*)this->mod)->setParent(((id > 1) ? id - 2 : id + 2));
-                ((gameObject*)this->game)->addGun((gun*)this->mod);
+
+            if (balance < 300) {
+                ImGui::Selectable("Buy Gun Module: Not Enough Money");
+            } else {
+                if (ImGui::Selectable("Buy Gun Module: $300")) {
+                    ((gameObject*)(parent->getGameObject()))->getPlayer()->addBalance(-300);
+                    this->setModuleNode((void*)(new gun(this->ModNodePos, 0, (void*)parent, this->game)), ((id > 1) ? id - 2 : id + 2));
+                    ((module*)this->mod)->setParent(((id > 1) ? id - 2 : id + 2));
+                    ((gameObject*)this->game)->addGun((gun*)this->mod);
+                }
             }
 
             ImGui::EndPopup();
@@ -156,7 +175,27 @@ void moduleNode::showModuleNode(ImDrawList* dl, float rad, int id, module* paren
     }
 
 }
+moduleNode::~moduleNode() {
+    if (this->mod != NULL) {
+        delete this->mod;
+        ((gameObject*)game)->getPlayer()->addBalance(100);
+        this->mod = NULL;
+    }
+}
+module::~module() {
+    ((module*)this->parent)->removeChild(this);
+    for (int i = 0; i < modNodes.size(); i++) {
 
+        delete modNodes[ i ];
+    }
+}
+void module::removeChild(module* m) {
+    for (int i = 0; i < modNodes.size(); i++) {
+        if (modNodes[ i ]->getNodeModule() == m) {
+            modNodes[ i ]->setModuleNode(NULL, i);
+        }
+    }
+}
 void module::showModuleNodes(ImDrawList* dl, float rd) {
     for (int i = 0; i < this->modNodes.size(); i++) {
 
@@ -165,6 +204,31 @@ void module::showModuleNodes(ImDrawList* dl, float rd) {
 
 
     }
+    ImGui::SetCursorPos(ImVec2(this->position.x - radius / 4, this->position.y - radius / 5));
+    ImGui::PushID(this);
+
+
+    if (ImGui::InvisibleButton(" ", ImVec2(radius, radius))) {
+
+        ImGui::OpenPopup("ModuleInfo", ImGuiPopupFlags_NoOpenOverExistingPopup);
+    }
+
+    if (ImGui::BeginPopup("ModuleInfo")) {
+
+        if (ImGui::Selectable("Sell")) {
+            ((gameObject*)(this->gObj))->getPlayer()->addBalance(100);
+            ((gameObject*)(this->gObj))->getPlayer()->removeGun((gun*)this);
+
+            ((module*)this->parent)->removeChild(this);
+
+
+        }
+        ImGui::EndPopup();
+    }
+
+
+
+    ImGui::PopID();
 }
 
 void moduleNode::setModuleNode(void* I_mod, int n) {
@@ -192,7 +256,6 @@ void truss::drawModule(ImDrawList* dl) {
             modNodes[ i ]->drawNodeModule(dl);
         }
     }
-    ImGui::Text("drawModule(TRUSS) %lf ; %lf", this->position.x, this->position.y);
     radius = 24;
     static ImVec2 p[ 4 ];
     float sep = M_PI / 2.0f;
@@ -214,38 +277,49 @@ void gun::fireGun(float bulletAngle) {
     std::cout << "Firing Gun" << std::endl;
     pewpew->push_back(new bullet(this->position, bulletAngle, ImColor(255, 0, 0, 255)));
 }
+void thruster::drawModule(ImDrawList* dl) {
+    for (int i = 0; i < modNodes.size(); i++) {
+        if ((modNodes[ i ]->getNodeModule() != NULL) && (modNodes[ i ]->getNodeModule() != this->parent)) {
+            modNodes[ i ]->drawNodeModule(dl);
+        }
+    }
+    radius = 24;
+    static ImVec2 p[ 4 ];
+    float sep = M_PI / 2.0f;
+    for (int n = 0; n < 4;n++) {
+        p[ n ].x = this->position.x - (radius * cos(this->rotation + ((float)n * sep)));
+        p[ n ].y = this->position.y - (radius * sin(this->rotation + ((float)n * sep)));
+        //std::cout << "x: " << p[ n ].x << " y: " << p[ n ].y << std::endl;
+    }
+    dl->AddLine(p[ 1 ], p[ 2 ], ImColor(255, 130, 40, 255), 2.0f);
+    dl->AddLine(p[ 2 ], p[ 3 ], ImColor(255, 130, 40, 255), 2.0f);
+    dl->AddLine(p[ 0 ], p[ 3 ], ImColor(255, 130, 40, 255), 2.0f);
 
+    if (((gameObject*)(gObj))->getPlayer()->getIsMoving()) {
+        for (int m = 0; m < 10;m++) {
+            dl->AddCircleFilled(ImVec2(this->position.x - ((rand() % 10) - 5), this->position.y - ((rand() % 20) - 10)), rand() % 7, ImColor(255, 130, 40, rand() % 255));
+        }
+    }
+
+}
 void gun::drawModule(ImDrawList* dl) {
 
     radius = 20;
     static ImVec2 p[ 4 ];
 
-
-    //p[ 0 ].x = this->position.x + (radius * (cos(this->rotation)));
-    //p[ 0 ].y = this->position.y + (radius * (sin(this->rotation)));
     p[ 0 ].x = this->position.x + (radius * (cos(this->rotation - (M_PI / 4.0f))));
     p[ 0 ].y = this->position.y + (radius * (sin(this->rotation - (M_PI / 4.0f))));
     p[ 1 ].x = this->position.x - (radius * (cos(this->rotation - (M_PI / 4.0f))));
     p[ 1 ].y = this->position.y - (radius * (sin(this->rotation - (M_PI / 4.0f))));
-    //dl->AddCircleFilled(p[ 1 ], 5, ImColor(255, 255, 0, 255));
-    //dl->AddCircleFilled(p[ 0 ], 5, ImColor(255, 255, 0, 255));
-    //std::cout << "x: " << p[ n ].x << " y: " << p[ n ].y << std::endl;
 
-
-
-
-//ImGui::Text("Points %lf ; %lf;%lf ; %lf", p[ 0 ].x, p[ 0 ].y, p[ 1 ].x, p[ 1 ].y);
-
-//std::cout << std::endl;
-//dl->AddQuad(p[ 0 ], p[ 1 ], p[ 2 ], p[ 3 ], ImColor(255, 0, 0, 255), 0.5f);
-    //dl->AddLine(p[ 0 ], p[ 1 ], ImColor(255, 0, 0, 255), 5.0f);
     dl->AddLine(p[ 0 ], p[ 1 ], ImColor(255, 0, 0, 255), 2.0f);
-
-
-//dl->AddLine(ImVec2(((p[ 0 ].x + p[ 1 ].x) / 2), ((p[ 0 ].y + p[ 1 ].y) / 2)), this->position, ImColor(255, 0, 0, 255), 5.0f);
 }
 
+thruster::~thruster() {
+    ((gameObject*)(this->gObj))->getPlayer()->addThruster(-2.5f, -5.0f);
+}
 
-
-
-
+thruster::thruster(ImVec2 pos, float rot, void* par, void* g) :module(pos, rot, par, g) {
+    this->modNodes.clear();
+    ((gameObject*)(this->gObj))->getPlayer()->addThruster(2.5f, 5.0f);
+}

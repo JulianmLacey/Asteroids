@@ -25,7 +25,7 @@ class player : public module {
 
 public:
     player() {};
-    player(ImVec2 pos);
+    player(ImVec2 pos, gameObject* g);
     ~player() {
         for (int i = 0; i < bullets.size(); i++) {
             delete bullets[ i ];
@@ -42,6 +42,12 @@ public:
     int getKills();
     float getTimeAlive();
     void addGun(gun* g);
+    void addThruster(float da, float ds);
+    void removeGun(gun* g);
+    void addKill();
+    bool getIsMoving();
+    bool getIsInventory();
+
     //void setNodeModule(module* n_mod, int idx);
     ImDrawList* getPlayerDrawList();
     ImVec2 getPosition();
@@ -55,8 +61,8 @@ private:
     float angle;
     int C_a = 5;
     float radius;
-    float maxSpeed = 30;
-    float friction = 0.15;
+    float maxSpeed;
+    float friction;
     uint balance;
     int kills;
     float timeAlive;
@@ -72,7 +78,11 @@ class enemy : public player {
 public:
     enemy() {};
     enemy(ImVec2 pos);
-    ~enemy() {};
+    ~enemy() {
+        for (int i = 0; i < EnemyBullets.size(); i++) {
+            delete EnemyBullets[ i ];
+        }
+    };
     void update(ImVec2& p1Position, ImVec2& p1PosReal);
     void calcEnemyPosition(ImVec2& p1Position);
     void drawEnemy(ImVec2& p1Position, ImDrawList* dl);

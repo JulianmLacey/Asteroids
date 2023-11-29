@@ -13,7 +13,7 @@ class module {
 public:
     module() {};
     module(ImVec2 pos, float rot, void* par, void* gaObj);
-    ~module() {};
+    ~module();
 
     virtual void updateModPosition(ImVec2& n_pos, float rot);
     virtual void drawModule(ImDrawList* dl);
@@ -24,7 +24,7 @@ public:
     void* getGameObject() {
         return this->gObj;
     }
-
+    void removeChild(module* m);
 protected:
     ImVec2 position;
     float mass;
@@ -52,8 +52,8 @@ public:
     thruster() :module() {
         this->modNodes.clear();
     };
-    thruster(ImVec2 pos, float rot, void* par, void* g) :module(pos, rot, par, g) { this->modNodes.clear(); };
-    ~thruster() {};
+    thruster(ImVec2 pos, float rot, void* par, void* g);
+    ~thruster();
     void drawModule(ImDrawList* dl) override;
 
 private:
@@ -63,7 +63,7 @@ class gun : public module {
 public:
     gun() :module() { this->modNodes.clear(); };
     gun(ImVec2 pos, float rot, void* par, void* g) :module(pos, rot, par, g) { this->modNodes.clear(); };
-    ~gun() {};
+    ~gun();
     void drawModule(ImDrawList* dl) override;
     void fireGun(float bulletAngle);
     void setPewPew(std::vector<bullet*>* pew) {
@@ -79,7 +79,7 @@ public:
         mod = NULL;
     };
 
-    ~moduleNode() {};
+    ~moduleNode();
     void updateNodePosition(ImVec2& pos, float rot);
     void drawNodeModule(ImDrawList* dl);
     void showModuleNode(ImDrawList* dl, float rad, int id, module* parent);
