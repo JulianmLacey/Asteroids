@@ -35,8 +35,6 @@ make
 ./Asteroids
 ```
 
-## Mock-Up
-
 ## Demo
-
+[![Demo](https://github.com/JulianmLacey/Asteroids/assets/117090683/9d8ad59f-8edd-4363-8125-204619ef7ade)](https://youtu.be/A8wpzeeTYPg)]
 
